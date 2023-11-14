@@ -75,11 +75,7 @@ contract Setup is ExtendedTest, IEvents {
     function setUpStrategyFactory() public returns (IStrategyFactoryInterface) {
         IStrategyFactoryInterface _factory = IStrategyFactoryInterface(
             address(
-                new StrategyFactory(
-                    management,
-                    performanceFeeRecipient,
-                    keeper
-                )
+                new StrategyFactory(management, performanceFeeRecipient, keeper)
             )
         );
         return _factory;
