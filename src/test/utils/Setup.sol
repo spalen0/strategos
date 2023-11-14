@@ -5,7 +5,9 @@ import "forge-std/console.sol";
 import {ExtendedTest} from "./ExtendedTest.sol";
 
 import {Strategy, ERC20} from "../../Strategy.sol";
+import {StrategyFactory} from "../../StrategyFactory.sol";
 import {IStrategyInterface} from "../../interfaces/IStrategyInterface.sol";
+import {IStrategyFactoryInterface} from "../../interfaces/IStrategyFactoryInterface.sol";
 
 // Inherit the events so they can be checked if desired.
 import {IEvents} from "@tokenized-strategy/interfaces/IEvents.sol";
@@ -22,6 +24,7 @@ contract Setup is ExtendedTest, IEvents {
     // Contract instances that we will use repeatedly.
     ERC20 public asset;
     IStrategyInterface public strategy;
+    IStrategyFactoryInterface public strategyFactory;
 
     mapping(string => address) public tokenAddrs;
 
@@ -49,10 +52,11 @@ contract Setup is ExtendedTest, IEvents {
         _setTokenAddrs();
 
         // Set asset
-        asset = ERC20(tokenAddrs["DAI"]);
+        asset = ERC20(tokenAddrs["aWBTC-WETH"]);
 
         // Set decimals
         decimals = asset.decimals();
+        strategyFactory = setUpStrategyFactory();
 
         // Deploy strategy and set variables
         strategy = IStrategyInterface(setUpStrategy());
@@ -66,6 +70,19 @@ contract Setup is ExtendedTest, IEvents {
         vm.label(management, "management");
         vm.label(address(strategy), "strategy");
         vm.label(performanceFeeRecipient, "performanceFeeRecipient");
+    }
+
+    function setUpStrategyFactory() public returns (IStrategyFactoryInterface) {
+        IStrategyFactoryInterface _factory = IStrategyFactoryInterface(
+            address(
+                new StrategyFactory(
+                    management,
+                    performanceFeeRecipient,
+                    keeper
+                )
+            )
+        );
+        return _factory;
     }
 
     function setUpStrategy() public returns (address) {
@@ -92,8 +109,17 @@ contract Setup is ExtendedTest, IEvents {
         address _user,
         uint256 _amount
     ) public {
+        depositIntoStrategy(_strategy, _user, _amount, asset);
+    }
+
+    function depositIntoStrategy(
+        IStrategyInterface _strategy,
+        address _user,
+        uint256 _amount,
+        ERC20 _asset
+    ) public {
         vm.prank(_user);
-        asset.approve(address(_strategy), _amount);
+        _asset.approve(address(_strategy), _amount);
 
         vm.prank(_user);
         _strategy.deposit(_amount, _user);
@@ -104,8 +130,17 @@ contract Setup is ExtendedTest, IEvents {
         address _user,
         uint256 _amount
     ) public {
-        airdrop(asset, _user, _amount);
-        depositIntoStrategy(_strategy, _user, _amount);
+        mintAndDepositIntoStrategy(_strategy, _user, _amount, asset);
+    }
+
+    function mintAndDepositIntoStrategy(
+        IStrategyInterface _strategy,
+        address _user,
+        uint256 _amount,
+        ERC20 _asset
+    ) public {
+        airdrop(_asset, _user, _amount);
+        depositIntoStrategy(_strategy, _user, _amount, _asset);
     }
 
     // For checking the amounts in the strategy
@@ -148,5 +183,7 @@ contract Setup is ExtendedTest, IEvents {
         tokenAddrs["USDT"] = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
         tokenAddrs["DAI"] = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
         tokenAddrs["USDC"] = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+        // Gamma vault assets
+        tokenAddrs["aWBTC-WETH"] = 0x4B9e26a02121a1C541403a611b542965Bd4b68Ce;
     }
 }

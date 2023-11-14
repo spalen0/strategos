@@ -23,6 +23,21 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 contract Strategy is BaseStrategy {
     using SafeERC20 for ERC20;
 
+    // contract addresses: https://docs.gamma.xyz/gamma/learn/scans#infrastructure-contracts
+    // Polygon PoS for QuickSwap
+    address constant HYPE_REGISTRY = 0xAeC731F69Fa39aD84c7749E913e3bC227427Adfd;
+    address constant UNI_PROXY = 0xA42d55074869491D60Ac05490376B74cF19B00e6;
+    // @todo pick the correct one and pass it to the constructor
+    address constant GAMMA_CHEF_1 = 0x20ec0d06F447d550fC6edee42121bc8C1817b97D;
+    address constant GAMMA_CHEF_2 = 0xcC54AfCeCD0d89e0B2db58f5d9e58468E7aD20dc;
+    address constant GAMMA_CHEF_3 = 0x68678Cf174695fc2D27bd312DF67A3984364FFDd;
+    // https://docs.google.com/spreadsheets/d/19i8dQt-F3TncJ2jlYWOJ-cOmnleKvqz1rJiiv-QTS9M/edit#gid=0
+    // @todo there are 10 rewarder contracts, pick the right one and pass it to the constructor
+    address constant REWARDER = 0x158B99aE660D4511e4c52799e1c47613cA47a78a;
+
+    /// @notice QuickSwap router
+    address constant ROUTER = 0xf5b509bB0909a69B1c207E495f687a596C168E12;
+
     constructor(
         address _asset,
         string memory _name
